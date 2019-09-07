@@ -102,8 +102,12 @@ class HomeViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! PostTableViewCell
         cell.setPostDate(postArray[indexPath.row])
         
-        //セル内のボタンのアクションをソースコードで設定する
+        //セル内のlikeボタンのアクションをソースコードで設定する
         cell.likeButton.addTarget(self, action:#selector(handleButton(_:forEvent:)), for: .touchUpInside)
+        
+        //セル内のsentボタンのアクションをソースコードで設定
+        cell.commentSentButton.tag = indexPath.row
+        cell.commentSentButton.addTarget(self, action:#selector(sentComment(_:forEvent:)), for: .touchUpInside)
         
         return cell
     }
@@ -143,5 +147,38 @@ class HomeViewController: UIViewController, UITableViewDelegate,UITableViewDataS
             postRef.updateChildValues(likes)
         }
     }
-
+    
+    
+    @objc func sentComment(_ sender: UIButton, forEvent event: UIEvent){
+        print("DEBUG_PRINT: sentボタンがタッチされた")
+        
+        //タップされたセルのインデックスを求める
+        let touch = event.allTouches?.first
+        let point = touch!.location(in: self.tableView)
+        let indexPath = tableView.indexPathForRow(at: point)
+        
+        
+        let cell = self.tableView.cellForRow(at: indexPath!) as! PostTableViewCell
+        
+        //配列からタップされたインデックスのデータを取り出す
+        let postData = postArray[indexPath!.row]
+        let myName = Auth.auth().currentUser?.displayName
+        
+        //Firebaseに保存するデータの準備
+        if let comment = cell.inputCommentTextField.text, let inputName = myName{
+            postData.comments.append(comment)
+            postData.commentNames.append(inputName)
+        }
+        
+        //辞書を作成してFirebaseに保存する
+        let postRef = Database.database().reference().child(Const.PostPath).child(postData.id!)
+        let comments = ["comments": postData.comments]
+        let commentNames = ["commentNames": postData.commentNames]
+        postRef.updateChildValues(comments)
+        postRef.updateChildValues(commentNames)
+        
+        cell.inputCommentTextField.text = ""
+        self.tableView.reloadData()
+    }
 }
+
