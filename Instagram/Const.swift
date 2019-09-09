@@ -9,5 +9,5 @@
 import Foundation
 
 struct Const{
-    static let PostPath = "Posts"
+    static let PostPath = "posts"
 }

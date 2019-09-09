@@ -52,15 +52,12 @@ class PostTableViewCell: UITableViewCell {
             self.likeButton.setImage(buttonImage, for: .normal)
         }
         
-        var commentName = ""
-        for Name in postData.commentNames{
-            commentName += "\(Name)\n"
-        }
-        commentNameLabel.text = commentName
-        
         var allcomment = ""
         for comment in postData.comments{
-            allcomment += "\(comment)\n"
+            let index = postData.comments.firstIndex(of: comment)
+            if let addindex = index{
+                allcomment += "\(postData.commentNames[addindex]):\(comment)\n"
+            }
         }
         commentLabel.text = allcomment
     }
